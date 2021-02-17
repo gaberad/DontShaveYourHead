@@ -18,10 +18,10 @@ namespace DontShaveYourHead
 			//get current hair texture
 			Texture2D hairTexture = getReadableTexture((Texture2D)material.mainTexture);
 
-			//get the percentage from the bottom
+			//get the percentage above the bottom
 			double percentage = ((double)getLowestPixel(hairTexture) / (double)hairTexture.height) * 100;
 
-			return 100 - (int)percentage; //need to subtract from 100 to get the value starting from the top e.g. if the value is 33 (33% from the bottom), then return 77 (77% from the top)
+			return (int)percentage;
 		}
 
 		private static int getLowestPixel(Texture2D hairTexture)

@@ -10,93 +10,57 @@ namespace DontShaveYourHead
 {
 	public interface IHairUtility
 	{
-		Material GetHairMatFor(Pawn pawn, Rot4 facing);
+		Material GetCustomHairMat(Pawn pawn, Rot4 facing);
 	}
-
 
 	public class HairUtility : IHairUtility
 	{
-		protected readonly ILogger logger;
-		protected Dictionary<Enums.Coverage, ICoverageType> headCoverages;
-		protected bool init;
+		//IsHeadCoverage: bool, CoverageType: ICoverageType
+		protected Dictionary<bool, IHeadCoverage> headCoverages;
 
-		public HairUtility(ILogger logger)
+		public HairUtility(bool useFallbackTextures)
 		{
-			this.logger = logger;
-		}
-
-		protected virtual void Init()
-		{
-			if (!this.init) //if init hasn't been run yet
+			this.headCoverages = new Dictionary<bool, IHeadCoverage>()
 			{
-				//setting defs here, since defs aren't loaded when Controller is called
-				this.headCoverages = new Dictionary<Enums.Coverage, ICoverageType>()
-				{
-					{ Enums.Coverage.None, new CoverageType.None() },
-					{ Enums.Coverage.Jaw, new CoverageType.CoveredType(Enums.Coverage.Jaw) },
-					{ Enums.Coverage.UpperHead, new CoverageType.CoveredType(Enums.Coverage.UpperHead) },
-					{ Enums.Coverage.FullHead, new CoverageType.CoveredType(Enums.Coverage.FullHead) }
-				};
-			}
+				{ false, new HeadCoverage.NotCovered() },
+				{ true, useFallbackTextures ? (IHeadCoverage)new HeadCoverage.Covered_Fallback() : (IHeadCoverage)new HeadCoverage.Covered() }
+			};
 		}
 
-		public Material GetHairMatFor(Pawn pawn, Rot4 facing)
+		//returns a custom hair texture based on the current hair texture
+		public Material GetCustomHairMat(Pawn pawn, Rot4 facing)
 		{
-			this.Init(); //initialize some variables
+			var maxCoverageDef = this.getMaxCoverageDef(pawn); //find the def with max coverage
 
-			// Find maximum coverage of non-mask headwear
-			var maxCoverage = this.getMaxCoverage(pawn);
+			//using IsHeadDef as the key to return a HeadCoverage type i.e. covered or not covered
+			var headCoverage = this.headCoverages[maxCoverageDef.GetModExtension<BodyPartGroupDefExtension>().IsHeadDef];
 
-			string texPath = maxCoverage.GetTexPath(pawn);
+			//passing in the pawn & coverage level to get the custom texture path
+			string texPath = headCoverage.GetTexPath(pawn, maxCoverageDef.GetModExtension<BodyPartGroupDefExtension>().CoverageLevel);
 
 			return GraphicDatabase.Get<Graphic_Multi>(texPath, ShaderDatabase.Cutout, Vector2.one, pawn.story.hairColor).MatAt(facing); // Set new graphic
 		}
 
-		//gets how much of the head the hat/helmet is covering
-		private ICoverageType getMaxCoverage(Pawn pawn)
+		//gets the def with the highest coverage level
+		private BodyPartGroupDef getMaxCoverageDef(Pawn pawn)
 		{
-			var maxCoverage = this.headCoverages[Enums.Coverage.None];
-
 			//dubs bad hygeine clears apparelGraphics when washing, so only check for coverage if the pawn's headgear is actually rendered
 			if (pawn.Drawer.renderer.graphics.apparelGraphics.Any())
 			{
-				//flattening body part groups, and returning coverage type based on defextension
-				var coverages = from apparel in pawn.apparel.WornApparel.Where(a => !a.def.apparel.hatRenderedFrontOfFace)
+				//from the worn apparels, get the body part groups they're attached to
+				var bodypartGroups = from apparel in pawn.apparel.WornApparel.Where(a => !a.def.apparel.hatRenderedFrontOfFace)
 									 from bodyPartGroup in apparel.def.apparel.bodyPartGroups
-									 select this.headCoverages[bodyPartGroup.GetModExtension<BodyPartGroupDefExtension>().Coverage];
+									 select bodyPartGroup;
 
-				//get the max coverage
-				maxCoverage = coverages.OrderByDescending(c => c.Coverage).FirstOrDefault();
+				//get the def with the highest coverage level
+				return bodypartGroups.OrderByDescending(b => b.GetModExtension<BodyPartGroupDefExtension>().CoverageLevel).FirstOrDefault();
 			}
-
-			return maxCoverage;
-		}
-	}
-
-	public class HairUtility_Fallback : HairUtility
-	{
-		private Dictionary<string, string> cachedTextures = new Dictionary<string, string>();
-		private List<FallbackTextures> fallbackTexturesList;
-		public HairUtility_Fallback(ILogger logger) : base(logger) { }
-
-		protected override void Init()
-		{
-			if (!this.init) //if init hasn't been run yet
+			else
 			{
-				//setting defs here, since defs aren't loaded when Controller is called
-				this.fallbackTexturesList = FallbackTextures.CreateFallbackTexturesList(DefDatabase<FallbackTextureListDef>.AllDefs);
-
-				this.headCoverages = new Dictionary<Enums.Coverage, ICoverageType>()
-				{
-					{ Enums.Coverage.None, new CoverageType.None() },
-					{ Enums.Coverage.Jaw, new CoverageType.CoveredType_Fallback(Enums.Coverage.Jaw, this.cachedTextures, this.fallbackTexturesList, this.logger) },
-					{ Enums.Coverage.UpperHead, new CoverageType.CoveredType_Fallback(Enums.Coverage.UpperHead, this.cachedTextures, this.fallbackTexturesList, this.logger) },
-					{ Enums.Coverage.FullHead, new CoverageType.CoveredType_Fallback(Enums.Coverage.FullHead, this.cachedTextures, this.fallbackTexturesList, this.logger) }
-				};
-
+				return BodyPartGroupDefOf.Torso; //using Torso as a default 'None' type bodypartgroupdef
 			}
 		}
-		
+
 	}
 
 }

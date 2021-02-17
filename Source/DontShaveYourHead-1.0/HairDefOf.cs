@@ -8,10 +8,11 @@ using UnityEngine;
 
 namespace DontShaveYourHead
 {
+    //just creating a DefOf so we can use it to return the shaved hair def
     [DefOf]
     public static class HairDefOf
     {
-        public static HairDef Shaved; //gets the shaved hair def
+        public static HairDef Shaved;
     }
 
 }

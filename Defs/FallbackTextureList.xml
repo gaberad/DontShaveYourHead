@@ -2,19 +2,25 @@
 <Defs>
 
 	<!-- 
-	bottomPixelRange is the range for the bottom pixel of a texture to fall in to determines the type of hair (measured in percentage, to account for different texture sizes)
+	If enabled, FallbackTextures are used when no custom texture exists for a particular hair style(instead of using the default 'shaved' hair type).
+	
+	The existing hair will have its length calculated, and will return the list of texturePaths of comparable length, depending on whhich bottomPixelRange its bottom pixel falls in e.g. short hair will return short hair styles etc.
+
+	The mod will then semi-random-but-deterministically select a hair style from the list. This is done by hashing and comparing the original texture path string vs the texturePathList strings, and selecting the closest match. This way it should always return the same 'random' hair style.
+	
+	bottomPixelRange is the range for the bottom pixel of a texture to fall in to determines the type of hair. It's measured in percentage, to account for different texture sizes (128x128 vs 256x256 etc)
 	
 	e.g. 
-		if the bottom pixel of the texture is at 50, then it's FallbackTextures_Short
-		if the bottom pixel of the texture is at 72, then it's FallbackTextures_Medium
-		if the bottom pixel of the texture is at 87, then it's FallbackTextures_Long
+		if the bottom pixel of the texture is 41% above the bottom, then it's FallbackTextures_Short
+		if the bottom pixel of the texture is 27% above the bottom, then it's FallbackTextures_Medium
+		if the bottom pixel of the texture is 12% above the bottom, then it's FallbackTextures_Long
 	-->
 	
 	<DontShaveYourHead.FallbackTextureListDef>
 		<defName>FallbackTextures_Short</defName>
 		<bottomPixelRange>
-			<start>0</start>
-			<end>66</end>
+			<start>100</start>
+			<end>34</end>
 		</bottomPixelRange>
 		<texturePathList>
 			<li>Things/Pawn/Humanlike/Hairs/Mop</li>
@@ -31,8 +37,8 @@
 	<DontShaveYourHead.FallbackTextureListDef>
 		<defName>FallbackTextures_Medium</defName>
 		<bottomPixelRange>
-			<start>67</start>
-			<end>80</end>
+			<start>35</start>
+			<end>20</end>
 		</bottomPixelRange>
 		<texturePathList>
 			<li>Things/Pawn/Humanlike/Hairs/Flowy</li>
@@ -51,8 +57,8 @@
 	<DontShaveYourHead.FallbackTextureListDef>
 		<defName>FallbackTextures_Long</defName>
 		<bottomPixelRange>
-			<start>81</start>
-			<end>100</end>
+			<start>19</start>
+			<end>0</end>
 		</bottomPixelRange>
 		<texturePathList>
 			<li>Hairs/Braid</li>

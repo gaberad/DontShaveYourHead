@@ -16,11 +16,7 @@ namespace DontShaveYourHead
 		{
 			settings = GetSettings<DontShaveYourHeadSettings>();
 
-			//either logs to rimworld log or just comsume log message based on LogDebug setting
-			ILogger logger = settings.LogDebugMessage ? ((ILogger)new Logger()) : ((ILogger)new Logger_Nothing());
-
-			//if using fallback textures, use the fallback implementation
-			HairUtility = settings.UseFallbackTextures ? new HairUtility_Fallback(logger) : new HairUtility(logger);
+			HairUtility = new HairUtility(settings.UseFallbackTextures);
 
 			new Harmony("DontShaveYourHead-Harmony").PatchAll(Assembly.GetExecutingAssembly());
 		}
@@ -31,7 +27,6 @@ namespace DontShaveYourHead
 			Listing_Standard listingStandard = new Listing_Standard();
 			listingStandard.Begin(inRect);
 			listingStandard.CheckboxLabeled("SettingUseFallbackTextures".Translate(), ref settings.UseFallbackTextures, "SettingUseFallbackTexturesDesc".Translate());
-			listingStandard.CheckboxLabeled("SettingLogDebugMessage".Translate(), ref settings.LogDebugMessage, "SettingLogDebugMessageDesc".Translate());
 			listingStandard.End();
 			base.DoSettingsWindowContents(inRect);
 		}
@@ -66,7 +61,6 @@ namespace DontShaveYourHead
 	public class DontShaveYourHeadSettings : ModSettings
 	{
 		public bool UseFallbackTextures;
-		public bool LogDebugMessage;
 
 		/// <summary>
 		/// The part that writes our settings to file. Note that saving is by ref.
@@ -74,7 +68,6 @@ namespace DontShaveYourHead
 		public override void ExposeData()
 		{
 			Scribe_Values.Look(ref UseFallbackTextures, "useFallbackTextures", true);
-			Scribe_Values.Look(ref LogDebugMessage, "logDebugMessage", true);
 			base.ExposeData();
 		}
 

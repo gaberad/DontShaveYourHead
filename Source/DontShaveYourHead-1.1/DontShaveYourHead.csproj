@@ -61,15 +61,11 @@
   <ItemGroup>
     <Compile Include="BodyPartGroupDefs.cs" />
     <Compile Include="Controller.cs" />
-    <Compile Include="CoverageType.cs" />
-    <Compile Include="Enums.cs" />
     <Compile Include="FallbackTextureListDef.cs" />
-    <Compile Include="FallbackTextures.cs" />
     <Compile Include="HairDefOf.cs" />
     <Compile Include="HairUtility.cs" />
     <Compile Include="Harmony_PawnRenderer.cs" />
-    <Compile Include="Logger.cs" />
-    <Compile Include="MD5Utility.cs" />
+    <Compile Include="HeadCoverage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TextureUtility.cs" />
   </ItemGroup>

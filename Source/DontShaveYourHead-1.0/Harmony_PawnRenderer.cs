@@ -23,7 +23,7 @@ namespace DontShaveYourHead
             // Check if we need to recalculate hair
             if (!isPortrait || !Prefs.HatsOnlyOnMap)
             {
-                mat = Controller.HairUtility.GetHairMatFor(pawn, facing);
+                mat = Controller.HairUtility.GetCustomHairMat(pawn, facing);
             }
             GenDraw.DrawMeshNowOrLater(mesh, loc, quat, mat, isPortrait);
         }
